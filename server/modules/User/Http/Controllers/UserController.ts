@@ -33,7 +33,8 @@ export class UserController {
       },
       select: {
         id: true,
-        name: true,
+        first_name: true,
+        last_name: true,
         email: true,
         createdAt: true,
       },

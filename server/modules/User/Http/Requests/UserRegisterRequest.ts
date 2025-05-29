@@ -1,12 +1,27 @@
 // server/modules/User/Requests/UserRegisterRequest.ts
 export interface UserRegisterRequest {
-  name: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  phone_number: string;
   email: string;
   password: string;
 }
 
 export const UserRegisterRequestRules = {
-  name: {
+  first_name: {
+    type: "string",
+    required: true,
+  },
+  last_name: {
+    type: "string",
+    required: true,
+  },
+  phone_number: {
+    type: "string",
+    required: true,
+  },
+  date_of_birth: {
     type: "string",
     required: true,
   },
