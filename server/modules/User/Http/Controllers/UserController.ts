@@ -1,5 +1,6 @@
 // server/modules/User/Http/Controllers/UserController.ts
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { prisma } from "../../../../utils/prisma";
 import { parseAndValidateBody } from "../../../../utils/body";
 import { getUser } from "../../Utils/user";
@@ -73,8 +74,8 @@ export class UserController {
     const token = signJwt({ id: user.id });
 
     setCookie(event, "auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      httpOnly: false,
+      secure: false,
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
@@ -84,9 +85,52 @@ export class UserController {
       message: "Login realizado com sucesso",
       user: {
         id: user.id,
-        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
       },
     };
+  }
+
+  public static async me(event: any) {
+    const token = getCookie(event, "auth_token");
+
+    if (!token) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Não autenticado",
+      });
+    }
+
+    let payload: any;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET!);
+    } catch {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Token inválido",
+      });
+    }
+
+    const user = await getUser(
+      { id: payload.id },
+      {
+        first_name: true,
+        last_name: true,
+        email: true,
+        date_of_birth: true,
+        id: true,
+        phone_number: true,
+      }
+    );
+
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Usuário não encontrado",
+      });
+    }
+
+    return { data: user };
   }
 }

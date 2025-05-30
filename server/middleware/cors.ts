@@ -1,13 +1,14 @@
+// server/middleware/cors.ts
 export default defineEventHandler((event) => {
-  console.log("CORS middleware rodando...");
-  const res = event.node.res;
+  setResponseHeaders(event, {
+    "Access-Control-Allow-Origin": process.env.NUXT_APP_URL,
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  });
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  if (event.node.req.method === "OPTIONS") {
-    res.statusCode = 204;
-    res.end();
+  if (getMethod(event) === "OPTIONS") {
+    event.node.res.statusCode = 204;
+    event.node.res.end();
   }
 });
